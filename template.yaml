@@ -1,0 +1,83 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  cec-notifications
+
+  Lambda function to process SQS events and send Firebase FCM notifications
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 30
+    MemorySize: 256
+    Environment:
+      Variables:
+        FIREBASE_PROJECT_ID: !Ref FirebaseProjectId
+
+Parameters:
+  FirebaseProjectId:
+    Type: String
+    Description: Firebase Project ID
+    Default: your-firebase-project-id
+
+  GoogleApplicationCredentials:
+    Type: String
+    Description: Path to Google Application Credentials JSON file for workload identity federation
+    Default: /var/task/credentials.json
+
+Resources:
+  # SQS Queue for notification events
+  NotificationQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: cec-notification-queue
+      VisibilityTimeout: 90 # 3x Lambda timeout
+      MessageRetentionPeriod: 1209600 # 14 days
+      ReceiveMessageWaitTimeSeconds: 20 # Long polling to reduce costs
+
+  # Lambda Function
+  NotificationFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: cec-notification-processor
+      CodeUri: .
+      Handler: bootstrap
+      Runtime: provided.al2023
+      Architectures:
+        - arm64
+      Environment:
+        Variables:
+          GOOGLE_APPLICATION_CREDENTIALS: !Ref GoogleApplicationCredentials
+      Policies:
+        - SQSPollerPolicy:
+            QueueName: !GetAtt NotificationQueue.QueueName
+        - Statement:
+            - Sid: CloudWatchLogsPolicy
+              Effect: Allow
+              Action:
+                - logs:CreateLogGroup
+                - logs:CreateLogStream
+                - logs:PutLogEvents
+              Resource: "*"
+      Events:
+        SQSEvent:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt NotificationQueue.Arn
+            BatchSize: 10
+            MaximumBatchingWindowInSeconds: 5
+            FunctionResponseTypes:
+              - ReportBatchItemFailures
+
+Outputs:
+  NotificationFunction:
+    Description: "Notification Lambda Function ARN"
+    Value: !GetAtt NotificationFunction.Arn
+
+  NotificationQueue:
+    Description: "SQS Queue URL"
+    Value: !Ref NotificationQueue
+
+  NotificationQueueArn:
+    Description: "SQS Queue ARN"
+    Value: !GetAtt NotificationQueue.Arn

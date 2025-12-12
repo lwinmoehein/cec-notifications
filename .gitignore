@@ -1,0 +1,28 @@
+# Build artifacts
+*.zip
+main
+bootstrap
+cec-notifications
+
+# SAM artifacts
+.aws-sam/
+samconfig.toml
+
+# Secrets and credentials
+*.json
+!events/*.json
+.env
+.env.*
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Go
+vendor/

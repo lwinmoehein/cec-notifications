@@ -1,68 +1,65 @@
-# Quick Setup Guide
+# Quick Fix for Firebase Authentication
 
-## Before Deployment
+## Problem
+Authentication error: `Request had invalid authentication credentials`
 
-1. **Create `credentials.json` for Workload Identity Federation**
+## Solution: Use Firebase Service Account
 
-   This file tells the Firebase SDK how to authenticate using your AWS Lambda role:
+### Step 1: Get Firebase Service Account Key
 
-   ```json
-   {
-     "type": "external_account",
-     "audience": "//iam.googleapis.com/projects/PROJECT_NUMBER/locations/global/workloadIdentityPools/aws-pool/providers/aws-provider",
-     "subject_token_type": "urn:ietf:params:aws:token-type:aws4_request",
-     "service_account_impersonation_url": "https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/fcm-sender@YOUR_PROJECT_ID.iam.gserviceaccount.com:generateAccessToken",
-     "token_url": "https://sts.googleapis.com/v1/token",
-     "credential_source": {
-       "environment_id": "aws1",
-       "regional_cred_verification_url": "https://sts.{region}.amazonaws.com?Action=GetCallerIdentity&Version=2011-06-15"
-     }
-   }
-   ```
+1. Go to https://console.firebase.google.com/
+2. Select project: **cec-app-6b091**
+3. Click **⚙️ Settings** → **Project Settings** → **Service Accounts** tab
+4. Click **Generate New Private Key** button
+5. Download the JSON file
 
-   Replace:
-   - `PROJECT_NUMBER` - Your GCP project number (not ID)
-   - `YOUR_PROJECT_ID` - Your Firebase/GCP project ID
+### Step 2: Replace credentials.json
 
-2. **Place the file in project root**
-   ```bash
-   # The file should be at:
-   # /Users/lwinmoehein/GolandProjects/cec-notifications/credentials.json
-   ```
+**IMPORTANT**: Replace your current `credentials.json` file with the one you just downloaded.
 
-## Deploy
-
-```bash
-# Build and deploy
-make deploy
-
-# During deployment, provide:
-# - Stack name: cec-notifications
-# - AWS Region: us-east-1 (or your preferred region)
-# - Firebase Project ID: your-firebase-project-id
+The file should start with:
+```json
+{
+  "type": "service_account",
+  "project_id": "cec-app-6b091",
+  ...
+}
 ```
 
-## Test
+**NOT** `"type": "external_account"` (that's for workload identity).
+
+### Step 3: Deploy
 
 ```bash
-# Get queue URL from outputs
+sam build
+sam deploy
+```
+
+### Step 4: Test
+
+Send a test message:
+```bash
+# Get your queue URL from CloudFormation outputs
 aws cloudformation describe-stacks \
-  --stack-name cec-notifications \
-  --query 'Stacks[0].Outputs[?OutputKey==`NotificationQueue`].OutputValue' \
+  --query 'Stacks[?StackName!=`null`]|[?Outputs!=`null`]|[0].Outputs[?OutputKey==`NotificationQueue`].OutputValue' \
   --output text
 
-# Send test message
+# Send test (replace QUEUE_URL and FCM_TOKEN)
 aws sqs send-message \
   --queue-url <QUEUE_URL> \
-  --message-body '{"fcmToken":"YOUR_DEVICE_TOKEN","title":"Test","body":"Hello from Lambda!"}'
-
-# View logs
-make logs
+  --message-body '{"fcmToken":"<YOUR_FCM_TOKEN>","title":"Test","body":"It works!"}'
 ```
 
-## Troubleshooting
+### Step 5: Check Logs
 
-If you see authentication errors:
-1. Verify `credentials.json` is in the deployed Lambda package
-2. Check that the Lambda execution role ARN matches the one configured in GCP workload identity
-3. Ensure the Firebase service account has `roles/firebase.admin` permissions
+```bash
+aws logs tail /aws/lambda/cec-notification-processor --follow
+```
+
+You should see:
+- ✅ `Firebase Project ID: cec-app-6b091`
+- ✅ `Credentials file exists at /var/task/credentials.json`
+- ✅ `Firebase app initialized successfully`
+- ✅ `Successfully sent FCM message`
+
+No more authentication errors! 🎉

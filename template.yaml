@@ -38,6 +38,8 @@ Resources:
   # Lambda Function
   NotificationFunction:
     Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: makefile
     Properties:
       FunctionName: cec-notification-processor
       CodeUri: .

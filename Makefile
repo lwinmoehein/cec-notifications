@@ -1,8 +1,10 @@
 .PHONY: build clean deploy test deps local-invoke
 
-# Build the Lambda binary
-build:
+# Build the Lambda binary and prepare artifacts
+build-NotificationFunction:
 	GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -tags lambda.norpc -o bootstrap main.go
+	cp credentials.json bootstrap $(ARTIFACTS_DIR)/
+	chmod 644 $(ARTIFACTS_DIR)/credentials.json
 
 # Install dependencies
 deps:

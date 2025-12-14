@@ -36,41 +36,17 @@ func SendFCMNotification(ctx context.Context, msg *NotificationMessage) error {
 	return nil
 }
 
-// SendFCMNotificationBatch sends multiple FCM notifications
-func SendFCMNotificationBatch(ctx context.Context, messages []*NotificationMessage) ([]error, error) {
-	client, err := config.GetMessagingClient(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get FCM client: %w", err)
-	}
+func SubscribeTokenToTopic(ctx context.Context, msg *NotificationMessage) error {
 
-	// Build FCM messages
-	fcmMessages := make([]*messaging.Message, len(messages))
-	for i, msg := range messages {
-		fcmMessages[i] = &messaging.Message{
-			Token: msg.FCMToken,
-			Notification: &messaging.Notification{
-				Title: msg.Title,
-				Body:  msg.Body,
-			},
-			Data: msg.Data,
-		}
-	}
+	return nil
+}
 
-	// Send messages as a batch
-	response, err := client.SendAll(ctx, fcmMessages)
-	if err != nil {
-		return nil, fmt.Errorf("failed to send FCM messages: %w", err)
-	}
+func UnsubscribeTokenFromTopic(ctx context.Context, msg *NotificationMessage) error {
 
-	log.Printf("Successfully sent %d/%d FCM messages", response.SuccessCount, len(messages))
+	return nil
+}
 
-	// Collect errors from failed messages
-	var errors []error
-	for i, resp := range response.Responses {
-		if !resp.Success {
-			errors = append(errors, fmt.Errorf("message %d failed: %v", i, resp.Error))
-		}
-	}
+func SendFCMNotificationToTopic(ctx context.Context, msg *NotificationMessage) error {
 
-	return errors, nil
+	return nil
 }

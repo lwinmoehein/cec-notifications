@@ -6,6 +6,7 @@ import (
 
 func TestParseSQSMessage_Valid(t *testing.T) {
 	messageBody := `{
+		"actionType": "SEND_SINGLE_NOTIFICATION",
 		"fcmToken": "test-token-123",
 		"title": "Test Title",
 		"body": "Test Body",
@@ -39,6 +40,7 @@ func TestParseSQSMessage_Valid(t *testing.T) {
 
 func TestParseSQSMessage_MissingToken(t *testing.T) {
 	messageBody := `{
+		"actionType": "SEND_SINGLE_NOTIFICATION",
 		"title": "Test Title",
 		"body": "Test Body"
 	}`
@@ -51,25 +53,35 @@ func TestParseSQSMessage_MissingToken(t *testing.T) {
 
 func TestParseSQSMessage_MissingTitle(t *testing.T) {
 	messageBody := `{
+		"actionType": "SEND_SINGLE_NOTIFICATION",
 		"fcmToken": "test-token-123",
 		"body": "Test Body"
 	}`
 
-	_, err := ParseSQSMessage(messageBody)
-	if err == nil {
-		t.Error("Expected error for missing title, got nil")
+	// This should pass now since title is optional (omitempty)
+	msg, err := ParseSQSMessage(messageBody)
+	if err != nil {
+		t.Fatalf("Expected no error, got: %v", err)
+	}
+	if msg.Title != "" {
+		t.Errorf("Expected empty title, got: %s", msg.Title)
 	}
 }
 
 func TestParseSQSMessage_MissingBody(t *testing.T) {
 	messageBody := `{
+		"actionType": "SEND_SINGLE_NOTIFICATION",
 		"fcmToken": "test-token-123",
 		"title": "Test Title"
 	}`
 
-	_, err := ParseSQSMessage(messageBody)
-	if err == nil {
-		t.Error("Expected error for missing body, got nil")
+	// This should pass now since body is optional (omitempty)
+	msg, err := ParseSQSMessage(messageBody)
+	if err != nil {
+		t.Fatalf("Expected no error, got: %v", err)
+	}
+	if msg.Body != "" {
+		t.Errorf("Expected empty body, got: %s", msg.Body)
 	}
 }
 
@@ -84,9 +96,9 @@ func TestParseSQSMessage_InvalidJSON(t *testing.T) {
 
 func TestParseSQSMessage_NoData(t *testing.T) {
 	messageBody := `{
+		"actionType": "SUBSCRIBE_TO_TOPIC",
 		"fcmToken": "test-token-123",
-		"title": "Test Title",
-		"body": "Test Body"
+		"topicName": "test-topic"
 	}`
 
 	msg, err := ParseSQSMessage(messageBody)
@@ -96,5 +108,9 @@ func TestParseSQSMessage_NoData(t *testing.T) {
 
 	if msg.Data != nil {
 		t.Errorf("Expected nil data, got: %v", msg.Data)
+	}
+
+	if msg.TopicName != "test-topic" {
+		t.Errorf("Expected topicName 'test-topic', got: %s", msg.TopicName)
 	}
 }

@@ -1,9 +1,14 @@
+# Sample SQS Message Events
+
+## 1. Send Single Notification
+
+```json
 {
   "Records": [
     {
       "messageId": "test-message-1",
       "receiptHandle": "test-receipt-handle",
-      "body": "{\"fcmToken\":\"your-test-fcm-token\",\"title\":\"Test Notification\",\"body\":\"This is a test notification from Lambda\",\"data\":{\"type\":\"test\",\"timestamp\":\"2024-01-01T00:00:00Z\"}}",
+      "body": "{\"actionType\":\"SEND_SINGLE_NOTIFICATION\",\"fcmToken\":\"your-device-token\",\"title\":\"Hello User\",\"body\":\"This is a direct notification\",\"data\":{\"type\":\"direct\",\"userId\":\"123\"}}",
       "attributes": {
         "ApproximateReceiveCount": "1",
         "SentTimestamp": "1523232000000",
@@ -18,3 +23,121 @@
     }
   ]
 }
+```
+
+## 2. Subscribe to Topic
+
+```json
+{
+  "Records": [
+    {
+      "messageId": "test-message-2",
+      "receiptHandle": "test-receipt-handle",
+      "body": "{\"actionType\":\"SUBSCRIBE_TO_TOPIC\",\"fcmToken\":\"your-device-token\",\"topicName\":\"news-updates\"}",
+      "attributes": {
+        "ApproximateReceiveCount": "1",
+        "SentTimestamp": "1523232000000",
+        "SenderId": "123456789012",
+        "ApproximateFirstReceiveTimestamp": "1523232000001"
+      },
+      "messageAttributes": {},
+      "md5OfBody": "test-md5",
+      "eventSource": "aws:sqs",
+      "eventSourceARN": "arn:aws:sqs:us-east-1:123456789012:cec-notification-queue",
+      "awsRegion": "us-east-1"
+    }
+  ]
+}
+```
+
+## 3. Send to Topic
+
+```json
+{
+  "Records": [
+    {
+      "messageId": "test-message-3",
+      "receiptHandle": "test-receipt-handle",
+      "body": "{\"actionType\":\"SEND_TO_TOPIC_NOTIFICATION\",\"topicName\":\"news-updates\",\"title\":\"Breaking News\",\"body\":\"Important update for all subscribers\",\"data\":{\"category\":\"news\",\"priority\":\"high\"}}",
+      "attributes": {
+        "ApproximateReceiveCount": "1",
+        "SentTimestamp": "1523232000000",
+        "SenderId": "123456789012",
+        "ApproximateFirstReceiveTimestamp": "1523232000001"
+      },
+      "messageAttributes": {},
+      "md5OfBody": "test-md5",
+      "eventSource": "aws:sqs",
+      "eventSourceARN": "arn:aws:sqs:us-east-1:123456789012:cec-notification-queue",
+      "awsRegion": "us-east-1"
+    }
+  ]
+}
+```
+
+## 4. Unsubscribe from Topic
+
+```json
+{
+  "Records": [
+    {
+      "messageId": "test-message-4",
+      "receiptHandle": "test-receipt-handle",
+      "body": "{\"actionType\":\"UNSUBSCRIBE_FROM_TOPIC\",\"fcmToken\":\"your-device-token\",\"topicName\":\"news-updates\"}",
+      "attributes": {
+        "ApproximateReceiveCount": "1",
+        "SentTimestamp": "1523232000000",
+        "SenderId": "123456789012",
+        "ApproximateFirstReceiveTimestamp": "1523232000001"
+      },
+      "messageAttributes": {},
+      "md5OfBody": "test-md5",
+      "eventSource": "aws:sqs",
+      "eventSourceARN": "arn:aws:sqs:us-east-1:123456789012:cec-notification-queue",
+      "awsRegion": "us-east-1"
+    }
+  ]
+}
+```
+
+## SQS Message Format Summary
+
+### SEND_SINGLE_NOTIFICATION
+```json
+{
+  "actionType": "SEND_SINGLE_NOTIFICATION",
+  "fcmToken": "device-token",
+  "title": "Notification Title",
+  "body": "Notification body",
+  "data": {"key": "value"}
+}
+```
+
+### SUBSCRIBE_TO_TOPIC
+```json
+{
+  "actionType": "SUBSCRIBE_TO_TOPIC",
+  "fcmToken": "device-token",
+  "topicName": "topic-name"
+}
+```
+
+### SEND_TO_TOPIC_NOTIFICATION
+```json
+{
+  "actionType": "SEND_TO_TOPIC_NOTIFICATION",
+  "topicName": "topic-name",
+  "title": "Notification Title",
+  "body": "Notification body",
+  "data": {"key": "value"}
+}
+```
+
+### UNSUBSCRIBE_FROM_TOPIC
+```json
+{
+  "actionType": "UNSUBSCRIBE_FROM_TOPIC",
+  "fcmToken": "device-token",
+  "topicName": "topic-name"
+}
+```

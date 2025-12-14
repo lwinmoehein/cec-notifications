@@ -8,7 +8,7 @@ import (
 // NotificationMessage represents the expected SQS message format
 type NotificationMessage struct {
 	ActionType string `json:"actionType"`
-	FCMToken   string `json:"fcmToken"`
+	FCMToken   string `json:"fcmToken,omitempty"`
 	TopicName  string `json:"topicName,omitempty"`
 
 	// Now Pointers: These will be nil if the fields are omitted in the JSON payload.
@@ -27,9 +27,6 @@ func ParseSQSMessage(messageBody string) (*NotificationMessage, error) {
 	}
 
 	// Validate required fields
-	if msg.FCMToken == "" {
-		return nil, fmt.Errorf("fcmToken is required")
-	}
 	if msg.ActionType == "" {
 		return nil, fmt.Errorf("action type is required")
 	}

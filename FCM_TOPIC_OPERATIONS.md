@@ -111,3 +111,52 @@ Look for:
 - ✓ `Successfully sent FCM message to topic`
 - ✓ `Unsubscribing token from topic: <topic>`
 - ✓ `Successfully unsubscribed token from topic`
+
+## Example Messages
+
+Send To Topic:
+```
+{
+  "actionType": "SEND_TO_TOPIC_NOTIFICATION" ,
+  "topicName": "general",
+  "title": "Quagmire",
+  "body": "Giggity"
+}
+```
+
+Send To Topic:
+```
+{
+  "actionType": "SEND_TO_TOPIC_NOTIFICATION" ,
+  "topicName": "general",
+  "title": "Quagmire",
+  "body": "Giggity"
+}
+```
+
+Subscribe To Topic:
+```
+{
+  "actionType": "SUBSCRIBE_TO_TOPIC",
+  "fcmToken": "cRR00dudQwiBQRcFENg1uq:APA91bHE2y4cPH2yfvHypLhxVaQev8sfFTee6SYPRDGWQ_U20TNy-eiics8xdAHO_e_m_8MD62SYDGqyJSGBU_PLKNKfokvCTxNC5BKso-NRYCSuQf2_Lp4",      
+  "topicName": "general"     
+}
+```
+UnSubscribe From Topic:
+```
+{
+  "actionType": "UNSUBSCRIBE_FROM_TOPIC",
+  "fcmToken": "cRR00dudQwiBQRcFENg1uq:APA91bHE2y4cPH2yfvHypLhxVaQev8sfFTee6SYPRDGWQ_U20TNy-eiics8xdAHO_e_m_8MD62SYDGqyJSGBU_PLKNKfokvCTxNC5BKso-NRYCSuQf2_Lp4",      
+  "topicName": "general"     
+}
+```
+Send To Token:
+```
+{
+  "actionType": "SEND_SINGLE_NOTIFICATION",
+  "fcmToken": "cRR00dudQwiBQRcFENg1uq:APA91bHE2y4cPH2yfvHypLhxVaQev8sfFTee6SYPRDGWQ_U20TNy-eiics8xdAHO_e_m_8MD62SYDGqyJSGBU_PLKNKfokvCTxNC5BKso-NRYCSuQf2_Lp4",      
+  "title": "Quag",
+  "body": "Giggity"
+}
+```
+
